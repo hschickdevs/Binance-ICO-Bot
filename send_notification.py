@@ -3,8 +3,8 @@ from load_config import *
 
 config = load_config('config.yml')
 
-def send_notification(coin):
 
+def send_notification(coin):
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
     sent_from = config['EMAIL_ADDRESS']

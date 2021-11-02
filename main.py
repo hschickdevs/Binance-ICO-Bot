@@ -11,7 +11,6 @@ import threading
 import json
 import os.path
 
-
 # loads local configuration
 config = load_config('config.yml')
 
@@ -55,7 +54,7 @@ def get_price(coin, pairing):
     """
     Get the latest price for a coin
     """
-    return client.get_ticker(symbol=coin+pairing)['lastPrice']
+    return client.get_ticker(symbol=coin + pairing)['lastPrice']
 
 
 def add_updated_all_coins_to_queue(queue):
@@ -135,19 +134,18 @@ def main():
                     volume = order[coin]['volume']
                     symbol = coin.split(pairing)[0]
 
-
                     last_price = get_price(symbol, pairing)
 
                     # update stop loss and take profit values if threshold is reached
-                    if float(last_price) < stored_price - (stored_price*coin_tp /100) and enable_tsl:
+                    if float(last_price) < stored_price - (stored_price * coin_tp / 100) and enable_tsl:
                         # increase as absolute value for TP
-                        new_tp = float(last_price) - (float(last_price)*ttp /100)
+                        new_tp = float(last_price) - (float(last_price) * ttp / 100)
                         # convert back into % difference from when the coin was bought
-                        new_tp = float( (new_tp - stored_price) / stored_price*100)
+                        new_tp = float((new_tp - stored_price) / stored_price * 100)
 
                         # same deal as above, only applied to trailing SL
-                        new_sl = float(last_price) + (float(last_price)*tsl /100)
-                        new_sl = float((new_sl - stored_price) / stored_price*100)
+                        new_sl = float(last_price) + (float(last_price) * tsl / 100)
+                        new_sl = float((new_sl - stored_price) / stored_price * 100)
 
                         # new values to be added to the json file
                         order[coin]['tp'] = new_tp
@@ -157,7 +155,8 @@ def main():
                         print(f'updated tp: {round(new_tp, 3)} and sl: {round(new_sl, 3)}')
 
                     # close trade if tsl is reached or trail option is not enabled
-                    elif float(last_price) > stored_price + (stored_price*sl /100) or float(last_price) < stored_price - (stored_price*coin_tp /100) and not enable_tsl:
+                    elif float(last_price) > stored_price + (stored_price * sl / 100) or float(
+                            last_price) < stored_price - (stored_price * coin_tp / 100) and not enable_tsl:
 
                         try:
 
@@ -165,8 +164,7 @@ def main():
                             if not test_mode:
                                 sell = create_order(coin, coin['volume'], 'BUY')
 
-
-                            print(f"sold {coin} at {(float(last_price) - stored_price) / float(stored_price)*100}")
+                            print(f"sold {coin} at {(float(last_price) - stored_price) / float(stored_price) * 100}")
 
                             # remove order from json file
                             order.pop(coin)
@@ -188,13 +186,13 @@ def main():
                                 store_order('sold.json', sold_coins)
                             else:
                                 sold_coins[coin] = {
-                                            'symbol':coin,
-                                            'price':last_price,
-                                            'volume':volume,
-                                            'time':datetime.timestamp(datetime.now()),
-                                            'profit': float(last_price) - stored_price,
-                                            'relative_profit': round((float(last_price) - stored_price) / stored_price*100, 3)
-                                            }
+                                    'symbol': coin,
+                                    'price': last_price,
+                                    'volume': volume,
+                                    'time': datetime.timestamp(datetime.now()),
+                                    'profit': float(last_price) - stored_price,
+                                    'relative_profit': round((float(last_price) - stored_price) / stored_price * 100, 3)
+                                }
 
                                 store_order('sold.json', sold_coins)
 
@@ -208,9 +206,9 @@ def main():
                 # check if new coins are listed
                 new_coins = get_new_coins(coin_seen_dict, all_coins_updated)
 
-                #print("time to get updated list of coins: ", time.time() - t0)
-                #print("current amount of threads: ", len(threading.enumerate()))
-                #print("current queue length: ", len(queue_of_updated_all_coins))
+                # print("time to get updated list of coins: ", time.time() - t0)
+                # print("current amount of threads: ", len(threading.enumerate()))
+                # print("current queue length: ", len(queue_of_updated_all_coins))
                 t0 = time.time()
             else:
                 # if no new all_coins_updated is on the queue, new_coins should be empty
@@ -235,19 +233,19 @@ def main():
                             # Run a test trade if true
                             if config['TRADE_OPTIONS']['TEST']:
                                 order[coin['symbol']] = {
-                                            'symbol':symbol_only+pairing,
-                                            'price':price,
-                                            'volume':volume,
-                                            'time':datetime.timestamp(datetime.now()),
-                                            'tp': tp,
-                                            'sl': sl
-                                            }
+                                    'symbol': symbol_only + pairing,
+                                    'price': price,
+                                    'volume': volume,
+                                    'time': datetime.timestamp(datetime.now()),
+                                    'tp': tp,
+                                    'sl': sl
+                                }
 
                                 print('PLACING TEST ORDER')
 
                             # place a live order if False
                             else:
-                                order[coin['symbol']] = create_order(symbol_only+pairing, volume, 'SELL')
+                                order[coin['symbol']] = create_order(symbol_only + pairing, volume, 'SELL')
                                 order[coin['symbol']]['tp'] = tp
                                 order[coin['symbol']]['sl'] = sl
 
@@ -259,7 +257,8 @@ def main():
 
                             store_order('order.json', order)
                     else:
-                        print(f"New coin detected, but {coin['symbol']} is currently in portfolio, or {pairing} does not match")
+                        print(
+                            f"New coin detected, but {coin['symbol']} is currently in portfolio, or {pairing} does not match")
 
             else:
                 pass
